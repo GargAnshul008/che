@@ -16,6 +16,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.Pages.iterate;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 
 import com.google.inject.persist.Transactional;
 import java.util.Collections;
@@ -34,7 +36,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
@@ -314,12 +315,17 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
               (maxItems, skipCount) ->
                   workspaceManager.getByNamespace(
                       event.getAccount().getName(), false, maxItems, skipCount))) {
-        // Will try to stop running workspaces
-        if (WorkspaceStatus.RUNNING.equals(workspace.getStatus())) {
+        // Will try to stop running/starting workspaces.
+        // At the moment is impossible to force stop for  STOPPING workspace
+        if (RUNNING.equals(workspace.getStatus()) || STARTING.equals(workspace.getStatus())) {
           String owner = workspace.getRuntime().getOwner();
           if (owner.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
             workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
           } else {
+            // If current user not owner we going to reset EnvironmentContext, in this case
+            // Service Account credentials will be used for stopping workspace.
+            // If Service Account have required permissions workspace will be stopped otherwise
+            // exception thrown.
             EnvironmentContext current = EnvironmentContext.getCurrent();
             try {
               EnvironmentContext.reset();
