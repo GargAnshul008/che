@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.Pages.iterate;
 
 import com.google.inject.persist.Transactional;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
@@ -40,6 +42,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 
@@ -311,6 +314,21 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
               (maxItems, skipCount) ->
                   workspaceManager.getByNamespace(
                       event.getAccount().getName(), false, maxItems, skipCount))) {
+        // Will try to stop running workspaces
+        if (WorkspaceStatus.RUNNING.equals(workspace.getStatus())) {
+          String owner = workspace.getRuntime().getOwner();
+          if (owner.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
+            workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
+          } else {
+            EnvironmentContext current = EnvironmentContext.getCurrent();
+            try {
+              EnvironmentContext.reset();
+              workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
+            } finally {
+              EnvironmentContext.setCurrent(current);
+            }
+          }
+        }
         workspaceManager.removeWorkspace(workspace.getId());
       }
     }
