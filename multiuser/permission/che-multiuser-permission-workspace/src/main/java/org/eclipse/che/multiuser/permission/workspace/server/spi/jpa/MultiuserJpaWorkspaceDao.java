@@ -322,20 +322,27 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
           if (owner.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
             workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
           } else {
-            // If current user not owner we going to reset EnvironmentContext, in this case
-            // Service Account credentials will be used for stopping workspace.
-            // If Service Account have required permissions workspace will be stopped otherwise
-            // exception thrown.
-            EnvironmentContext current = EnvironmentContext.getCurrent();
-            try {
-              EnvironmentContext.reset();
-              workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
-            } finally {
-              EnvironmentContext.setCurrent(current);
-            }
+            tryStopWorkspaceWithSA(workspace);
           }
         }
         workspaceManager.removeWorkspace(workspace.getId());
+      }
+    }
+
+    /**
+     * If current user not owner we going to reset EnvironmentContext, in this case Service
+     * Account(SA) credentials will be used for stopping workspace. If SA have required permissions
+     * workspace will be stopped otherwise exception thrown.
+     */
+    private void tryStopWorkspaceWithSA(WorkspaceImpl workspace)
+        throws ServerException, NotFoundException, ConflictException {
+      //
+      EnvironmentContext current = EnvironmentContext.getCurrent();
+      try {
+        EnvironmentContext.reset();
+        workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
+      } finally {
+        EnvironmentContext.setCurrent(current);
       }
     }
   }
