@@ -13,14 +13,15 @@ package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static java.util.Map.of;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP;
 
 import com.google.inject.persist.Transactional;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -320,12 +321,14 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
         if (RUNNING.equals(workspace.getStatus()) || STARTING.equals(workspace.getStatus())) {
           String owner = workspace.getRuntime().getOwner();
           if (owner.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
-            workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
+            workspaceManager.stopWorkspace(
+                workspace.getId(), of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
           } else {
             tryStopWorkspaceWithSA(workspace);
           }
+        } else {
+          workspaceManager.removeWorkspace(workspace.getId());
         }
-        workspaceManager.removeWorkspace(workspace.getId());
       }
     }
 
@@ -336,11 +339,11 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
      */
     private void tryStopWorkspaceWithSA(WorkspaceImpl workspace)
         throws ServerException, NotFoundException, ConflictException {
-      //
       EnvironmentContext current = EnvironmentContext.getCurrent();
       try {
         EnvironmentContext.reset();
-        workspaceManager.stopWorkspace(workspace.getId(), Collections.emptyMap());
+        workspaceManager.stopWorkspace(
+            workspace.getId(), of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
       } finally {
         EnvironmentContext.setCurrent(current);
       }

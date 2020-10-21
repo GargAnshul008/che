@@ -240,5 +240,9 @@ public final class Constants {
   /** The attribute for storing the time then last active workspace was stopped */
   public static final String LAST_ACTIVITY_TIME = "lastActivityTime";
 
+  /** The flag for remove workspace immediately then it was stopped */
+  public static final String REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP =
+      "removeWorkspaceImmediatelyAfterStop";
+
   private Constants() {}
 }

@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
+import static java.util.Map.of;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -21,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 import org.eclipse.che.account.event.BeforeAccountRemovedEvent;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.Page;
@@ -97,8 +98,8 @@ public class RemoveWorkspaceBeforeAccountRemovedEventSubscriberTest {
     EnvironmentContext.getCurrent().setSubject(SUBJECT);
     subscriber.onCascadeEvent(new BeforeAccountRemovedEvent(account));
 
-    verify(workspaceManager).stopWorkspace(workspaceId, Collections.emptyMap());
-    verify(workspaceManager).removeWorkspace(workspaceId);
+    verify(workspaceManager)
+        .stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
   }
 
   @Test
@@ -110,8 +111,8 @@ public class RemoveWorkspaceBeforeAccountRemovedEventSubscriberTest {
     EnvironmentContext.getCurrent().setSubject(SUBJECT);
     subscriber.onCascadeEvent(new BeforeAccountRemovedEvent(account));
 
-    verify(workspaceManager).stopWorkspace(workspaceId, Collections.emptyMap());
-    verify(workspaceManager).removeWorkspace(workspaceId);
+    verify(workspaceManager)
+        .stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
   }
 
   @Test
@@ -123,7 +124,7 @@ public class RemoveWorkspaceBeforeAccountRemovedEventSubscriberTest {
     EnvironmentContext.getCurrent().setSubject(SUBJECT);
     subscriber.onCascadeEvent(new BeforeAccountRemovedEvent(account));
 
-    verify(workspaceManager).stopWorkspace(workspaceId, Collections.emptyMap());
-    verify(workspaceManager).removeWorkspace(workspaceId);
+    verify(workspaceManager)
+        .stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
   }
 }
