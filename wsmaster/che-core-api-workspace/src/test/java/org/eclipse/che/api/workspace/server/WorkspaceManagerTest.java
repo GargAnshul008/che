@@ -26,7 +26,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_N
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVE_INFRASTRUCTURE_NAMESPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LAST_ACTIVITY_TIME;
-import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_AFTER_STOP;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
@@ -753,10 +753,9 @@ public class WorkspaceManagerTest {
     mockRuntime(workspace, RUNNING);
     mockAnyWorkspaceStop();
 
-    workspaceManager.stopWorkspace(
-        workspace.getId(), of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+    workspaceManager.stopWorkspace(workspace.getId(), of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
 
-    verify(runtimes).stopAsync(workspace, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+    verify(runtimes).stopAsync(workspace, of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
     verify(workspaceDao).remove(workspace.getId());
   }
 

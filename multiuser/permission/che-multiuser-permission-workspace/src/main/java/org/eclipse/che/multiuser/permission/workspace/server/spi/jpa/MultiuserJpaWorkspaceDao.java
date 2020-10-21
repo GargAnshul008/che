@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.Pages.iterate;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
-import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_AFTER_STOP;
 
 import com.google.inject.persist.Transactional;
 import java.util.List;
@@ -322,7 +322,7 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
           String owner = workspace.getRuntime().getOwner();
           if (owner.equals(EnvironmentContext.getCurrent().getSubject().getUserId())) {
             workspaceManager.stopWorkspace(
-                workspace.getId(), of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+                workspace.getId(), of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
           } else {
             tryStopWorkspaceWithSA(workspace);
           }
@@ -342,8 +342,7 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
       EnvironmentContext current = EnvironmentContext.getCurrent();
       try {
         EnvironmentContext.reset();
-        workspaceManager.stopWorkspace(
-            workspace.getId(), of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+        workspaceManager.stopWorkspace(workspace.getId(), of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
       } finally {
         EnvironmentContext.setCurrent(current);
       }

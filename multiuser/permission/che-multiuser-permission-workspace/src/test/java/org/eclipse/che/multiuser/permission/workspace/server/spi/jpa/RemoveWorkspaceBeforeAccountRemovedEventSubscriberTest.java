@@ -12,7 +12,7 @@
 package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
 import static java.util.Map.of;
-import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP;
+import static org.eclipse.che.api.workspace.shared.Constants.REMOVE_WORKSPACE_AFTER_STOP;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -98,8 +98,7 @@ public class RemoveWorkspaceBeforeAccountRemovedEventSubscriberTest {
     EnvironmentContext.getCurrent().setSubject(SUBJECT);
     subscriber.onCascadeEvent(new BeforeAccountRemovedEvent(account));
 
-    verify(workspaceManager)
-        .stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+    verify(workspaceManager).stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
   }
 
   @Test
@@ -111,8 +110,7 @@ public class RemoveWorkspaceBeforeAccountRemovedEventSubscriberTest {
     EnvironmentContext.getCurrent().setSubject(SUBJECT);
     subscriber.onCascadeEvent(new BeforeAccountRemovedEvent(account));
 
-    verify(workspaceManager)
-        .stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+    verify(workspaceManager).stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
   }
 
   @Test
@@ -124,7 +122,6 @@ public class RemoveWorkspaceBeforeAccountRemovedEventSubscriberTest {
     EnvironmentContext.getCurrent().setSubject(SUBJECT);
     subscriber.onCascadeEvent(new BeforeAccountRemovedEvent(account));
 
-    verify(workspaceManager)
-        .stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_IMMEDIATELY_AFTER_STOP, "true"));
+    verify(workspaceManager).stopWorkspace(workspaceId, of(REMOVE_WORKSPACE_AFTER_STOP, "true"));
   }
 }
